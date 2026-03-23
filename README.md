@@ -5,7 +5,7 @@ Official implementation of the 2026 CVPR paper "Fast Markov Random Field Optimis
 
 TLDR; Given a **source shape** (vertices `VX`, faces `FX`) and a **target shape** (vertices `VY`, faces `FY`), sm-gco finds a map from each source vertex to a target vertex by optimising a Markov Random Field energy over triangle-to-triangle assignments.
 
-## Installation
+## ⚙️ Installation
 
 ```bash
 pip install git+https://github.com/paul0noah/sm-gco-dev.git
@@ -13,7 +13,7 @@ pip install git+https://github.com/paul0noah/sm-gco-dev.git
 
 **Requirements:** CMake >= 3.16, C++17 compiler (GCC 8+ or Clang). Dependencies (libigl, pybind11, robin-map) are fetched automatically.
 
-## Usage
+## 🧑‍💻️‍ Usage
 
 ```python
 import numpy as np
@@ -48,13 +48,12 @@ print(f"Optimization took {optime:.2f} s")
 # tri_tri:   (|FX|, 3) array — per source triangle, the 3 matched target vertex indices
 ```
 
-## Configuration
+### Configuration
 
-`TriangleWiseOpts` controls the optimization. The defaults are tuned for typical shape matching:
+Using `TriangleWiseOpts` we can change default arguments for the optimisation:
 
 ```python
 opts = TriangleWiseOpts()
-# All defaults shown below — you only need to set what you want to change
 
 # Algorithm: 0=swap, 1=alpha-expansion, 5=custom expansion with adaptive cycles (default)
 opts.algorithm = 5
@@ -67,10 +66,6 @@ opts.cost_mode = COST_MODE.MULTIPLE_LABLE_SPACE_GEODIST_MAX  # default
 #   MULTIPLE_LABLE_SPACE_GEODIST_MAX  - max of geodesic distance between shared vertices (default)
 #   MULTIPLE_LABLE_SPACE_L2DIST       - sum of L2 distance between shared vertices
 #   MULTIPLE_LABLE_SPACE_L2DIST_MAX   - max of L2 distance between shared vertices
-#   MULTIPLE_LABLE_SPACE_SO3          - rotation distance
-#   MULTIPLE_LABLE_SPACE_SE3          - rigid transformation distance
-#   MULTIPLE_LABLE_SPACE_GEODIST_SO3  - geodesic + rotation distance
-#   SINGLE_LABLE_SPACE_L2             - single label space with L2 distance
 
 # Energy weights
 opts.smooth_weight = 1000.0              # pairwise term weight
@@ -81,7 +76,7 @@ opts.smooth_scale_before_robust = 0.1    # scale pairwise cost before robust los
 opts.robust_cost = 8
 
 # Label space
-opts.lable_space_cycle_size = 4          # max cycle length for triangle extraction on target
+opts.lable_space_cycle_size = 4          # max cycle length for triangle extraction on target (larger values will increase the label space)
 opts.lable_space_angle_thres = np.pi / 3 # angle threshold for orientation-preserving target triangles
 opts.lable_space_degenerate = True       # allow matching source triangles to target edges/vertices
 
@@ -92,19 +87,11 @@ opts.set_initial_lables = 4
 # Post-processing
 opts.glue_solution = True                # glue per-source-triangle result into per-vertex map
 
-# Optional settings
-opts.label_order = 0                     # 0=default, 1=random, 2=degenerate-last, 3=min-cost, 4=alternating
-opts.membrane_energy_weight = 0.0        # membrane energy weight (0 = disabled)
-opts.bending_energy_weight = 0.0         # bending energy weight (0 = disabled)
-opts.feature_weight = 1.0                # feature-based energy weight
-opts.same_label_cost = 0.0              # > 0 makes the cost a metric instead of pseudometric
-opts.bicolouring = False                 # enable bipartite graph colouring for optimization
-
 # Iteration control
 smgco.set_max_iter(-1)  # -1 = run until convergence (default)
 ```
 
-## Return Values
+### Return Values
 
 `smgco.triangle_wise(opts)` returns a 5-tuple:
 
@@ -116,26 +103,28 @@ smgco.set_max_iter(-1)  # -1 = run until convergence (default)
 | `raw_p2p`       | `(M, 2) int`   | Raw per-vertex correspondences before gluing                                   |
 | `raw_tri_tri`   | `(numFX, 3) int` | Raw triangle matching before gluing                                          |
 
-## Utility Functions
+### Utility Functions
 
 ```python
-from sm_gco import get_cycle_triangles, tri_bicolouring
+from sm_gco import get_cycle_triangles
 
-# Extract candidate triangles from the target mesh
+# Extract candidate triangles from the target mesh, ie all triangles in the label space
 cycle_tris = get_cycle_triangles(vy, fy, cycle_size=4, angle_threshold=np.pi/3)
 
-# Compute bipartite graph colouring of source mesh faces
-colours = tri_bicolouring(fx)  # returns (|FX|, 1) array of 0s and 1s
 ```
 
-## Testing
+## 🚧 Testing
 
 ```bash
 pip install pytest
 pytest tests/ -v
 ```
 
-## Attribution
+## 📝 Topfaust dataset
+
+see subfolder `data/`
+
+## 🎓 Attribution
 
 If you use this code, please cite:
 
@@ -143,7 +132,7 @@ If you use this code, please cite:
 @inproceedings{roetzer2026markov,
     author    = {Paul Roetzer and Johan Thunberg and Zorah L\"{a}hner and Florian Bernard},
     title     = {Fast Markov Random Field Optimisation for Topologically Noisy 3D Shape Matching},
-    booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+    booktitle = {CVPR},
     year      = {2026}
 }
 ```
