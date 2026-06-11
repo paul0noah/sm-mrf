@@ -28,6 +28,16 @@ vy, fy = igl.read_triangle_mesh("target.off")  # target shape
 feat_x = ...  # shape (|VX|, D) — features on source
 feat_y = ...  # shape (|VY|, D) — features on target
 
+# make sure we have uniform triangulation
+vx_orig, vy_orig = vx.copy(), vy.copy()
+nfx, nfy = fx.shape[0], fy.shape[0]
+vx, fx = igl.upsample(vx, fx, 2)
+vy, fy = igl.upsample(vy, fy, 2)
+_, vx, fx, _, _ = igl.decimate(vx, fx, nfx)
+_, vy, fy, _, _ = igl.decimate(vy, fy, nfy)
+x_to_orig, y_to_orig = knn_search(vx, vx_orig), knn_search(vy, vy_orig)
+feat_x, feat_y = feat_x[x_to_orig], feat_y[y_to_orig]
+
 # Compute per-vertex feature difference matrix (|VX| x |VY|)
 feature_difference = np.zeros((len(vx), len(vy)))
 for i in range(len(vx)):
@@ -46,6 +56,20 @@ print(f"Optimization took {optime:.2f} s")
 
 # point_map: (N, 2) array — each row is [source_vertex, target_vertex]
 # tri_tri:   (|FX|, 3) array — per source triangle, the 3 matched target vertex indices
+
+
+## Helper function
+from sklearn.neighbors import NearestNeighbors
+def knn_search(x, X, k=1):
+    """
+    find indices of k-nearest neighbors of x in X
+    """
+    nbrs = NearestNeighbors(n_neighbors=k, algorithm='ball_tree').fit(X)
+    _, indices = nbrs.kneighbors(x)
+    if k == 1:
+        return indices.flatten()
+    else:
+        return indices
 ```
 
 ### Configuration
