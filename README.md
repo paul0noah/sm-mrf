@@ -47,8 +47,7 @@ for i in range(len(vx)):
 fx, _ = igl.orient_outward(vx, fx, np.ones_like(fx)[:, 0])
 
 # Create solver: maps source -> target
-# feature_difference is transposed to (|VY| x |VX|) for the constructor
-smgco = GCOSM(vx, fx, vy, fy, feature_difference.T)
+smgco = GCOSM(vx, fx, vy, fy, feature_difference)
 
 # Run triangle-wise matching (uses sensible defaults)
 optime, point_map, tri_tri, raw_p2p, raw_tri_tri = smgco.triangle_wise()
