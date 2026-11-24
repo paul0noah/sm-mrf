@@ -56,6 +56,17 @@ print(f"Optimization took {optime:.2f} s")
 # point_map: (N, 2) array — each row is [source_vertex, target_vertex]
 # tri_tri:   (|FX|, 3) array — per source triangle, the 3 matched target vertex indices
 
+## Optional: plot the result (this requires installing polyscope)
+# import polyscope as ps
+
+# cmap_y = (vy - vy.min(axis=0)) / (vy.max(axis=0) - vy.min(axis=0))
+# cmap_x = np.zeros_like(vx)
+# cmap_x[point_map[:, 0]] = cmap_y[point_map[:, 1]]
+# ps.init()
+# ps.register_surface_mesh("source", vx, fx).add_color_quantity("map", cmap_x, enabled=True)
+# ps.register_surface_mesh("target", vy + [1.0 * np.ptp(vx[:, 0]), 0, 0], fy).add_color_quantity("map", cmap_y, enabled=True)
+# ps.show()
+
 
 ## Helper function
 from sklearn.neighbors import NearestNeighbors
